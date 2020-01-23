@@ -51,7 +51,13 @@ server.get('*', async ({ req }, res) => {
 
 const port = +process.env.PORT || 3000;
 
-server.listen(port, (err, address) => {
-  if (err) throw err;
-  console.log(`Server listening on ${address}`);
-});
+if (process.env.NGINX_UNIT) {
+  server.ready().then(() => {
+    console.log(`Server running`);
+  });
+} else {
+  server.listen(port, (err, address) => {
+    if (err) throw err;
+    console.log(`Server listening on ${address}`);
+  });
+}
