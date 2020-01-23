@@ -1,3 +1,9 @@
+if (process.env.NGINX_UNIT) {
+  const { IncomingMessage, ServerResponse } = require('unit-http');
+  require('http').ServerResponse = ServerResponse;
+  require('http').IncomingMessage = IncomingMessage;
+}
+
 import fs from 'fs';
 import fastify from 'fastify';
 import fileType from 'file-type';
@@ -14,7 +20,16 @@ if (!fs.existsSync(CACHE_DIR)) {
 }
 
 // Set up the server
-const server = fastify();
+const server = (() => {
+  if (!process.env.NGINX_UNIT) return fastify();
+
+  return fastify({
+    serverFactory: (handler, opts) =>
+      require('unit-http').createServer((req: any, res: any) => {
+        handler(req, res);
+      }),
+  });
+})();
 
 server.get('*', async ({ req }, res) => {
   const imageUrl = req.url.match(/\/(.*)/)[1];
