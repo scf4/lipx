@@ -19,6 +19,8 @@ const server = fastify();
 server.get('*', async ({ req }, res) => {
   const imageUrl = req.url.match(/\/(.*)/)[1];
 
+  if (!imageUrl) return res.status(200).send('OK');
+
   // Validate url
   if (!isValidUrl(imageUrl)) return res.status(400).send();
 
