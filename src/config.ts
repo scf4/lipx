@@ -1,3 +1,10 @@
 import path from 'path';
 
-export const CACHE_DIR = path.join(__dirname, '..', '.cache');
+const config = {
+  port: +process.env.PORT || 3000,
+  cacheDir: path.join(__dirname, '..', '.cache'),
+  timeout: 6000,
+  maxSize: 3 * 1000 * 1000,
+};
+
+export default config;

@@ -1,6 +1,6 @@
 {
   "name": "lipx",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Proxy external images through Lipx for security, speed, and consistency.",
   "main": "dist/app.js",
   "repository": "https://github.com/lowkeyhq/lipx",
@@ -8,18 +8,17 @@
   "author": "Scott at Lowkey",
   "scripts": {
     "start": "node dist/app.js",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "watch": "tsc-watch --onSuccess \"node dist/app.js\"",
     "test": "jest"
   },
   "dependencies": {
-    "@types/node-fetch": "^2.5.4",
     "fastify": "^2.11.0",
     "file-type": "^13.1.2",
-    "node-fetch": "^2.6.0",
-    "stream-file-type": "^0.4.0"
+    "node-fetch": "^2.6.0"
   },
   "devDependencies": {
+    "@types/node-fetch": "^2.5.4",
     "@types/jest": "^24.9.0",
     "@types/node": "^13.1.8",
     "jest": "^24.9.0",
