@@ -4,22 +4,16 @@ if (process.env.NGINX_UNIT) {
   require('http').IncomingMessage = IncomingMessage;
 }
 
-import fs from 'fs';
 import fastify from 'fastify';
-import fileType from 'file-type';
 
-import getCachedImage from './lib/getCachedImage';
-import getRemoteImage from './lib/getRemoteImage';
+import setup from './lib/setup';
+import getImage from './lib/getImage';
 import isValidUrl from './utils/isValidUrl';
 
-import { CACHE_DIR } from './config';
+import config from './config';
 
-// Create the cache directory
-if (!fs.existsSync(CACHE_DIR)) {
-  fs.mkdirSync(CACHE_DIR);
-}
+setup();
 
-// Set up the server
 const server = (() => {
   if (!process.env.NGINX_UNIT) return fastify();
 
@@ -31,34 +25,32 @@ const server = (() => {
   });
 })();
 
-server.get('*', async ({ req }, res) => {
-  const imageUrl = req.url.match(/\/(.*)/)[1];
-
-  if (!imageUrl) return res.status(200).send('OK');
-
-  // Validate url
-  if (!isValidUrl(imageUrl)) return res.status(400).send();
-
-  // Get file from local cache or remote url
-  let image = await getCachedImage(imageUrl);
-  if (!image) image = await getRemoteImage(imageUrl);
-
-  if (!image) return res.status(502).send();
-
-  // Get mime type
-  const { mime } = await fileType.fromBuffer(image);
-
-  return res.type(mime).send(image);
+server.get('/', async () => {
+  return 'OK';
 });
 
-const port = +process.env.PORT || 3000;
+server.get('/*', async ({ req }, reply) => {
+  const imageUrl = req.url.match(/\/(.*)/)[1];
+
+  if (!isValidUrl(imageUrl)) {
+    return reply.status(400).send();
+  }
+
+  try {
+    const { file, type } = await getImage(imageUrl);
+    return reply.type(type).send(file);
+  } catch (e) {
+    console.error(e);
+    return reply.status(415).send();
+  }
+});
 
 if (process.env.NGINX_UNIT) {
   server.ready().then(() => {
     console.log(`Server running`);
   });
 } else {
-  server.listen(port, (err, address) => {
+  server.listen(config.port, (err, address) => {
     if (err) throw err;
     console.log(`Server listening on ${address}`);
   });
