@@ -2,12 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import util from 'util';
 import { MimeType } from 'file-type/core';
-import fetch from 'node-fetch';
 
 import validateFileType from './validateFileType';
 import hashString from '../utils/hashString';
-import { ErrorMessage } from '../types/errors';
 import config from '../config';
+import fetchFile from '../utils/fetchFile';
 
 const fsExists = util.promisify(fs.exists);
 const fsReadFile = util.promisify(fs.readFile);
@@ -28,13 +27,9 @@ async function getImage(imageUrl: string): Promise<{ file: Buffer; type: MimeTyp
   }
 
   // Load remote image
-  const response = await fetch(imageUrl, { timeout: config.timeout });
 
-  if (+response.headers.get('Content-Length') > config.maxSize) {
-    throw new Error(ErrorMessage.FileTooLarge);
-  }
+  const file = await fetchFile(imageUrl, { size: config.maxSize, timeout: config.timeout });
 
-  const file = await response.buffer();
   const type = await validateFileType(file);
 
   // Save to cache
