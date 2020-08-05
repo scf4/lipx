@@ -13,7 +13,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "fastify": "^2.11.0",
+    "fastify": "^2.15.1",
     "file-type": "^13.1.2",
     "node-fetch": "^2.6.0"
   },
